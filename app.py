@@ -93,4 +93,6 @@ def download_file(filename):
     return send_from_directory(app.config['CONVERTED_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Dynamically get the port from environment variables
+    port = int(os.environ.get("PORT", 5000))  # default to 5000 if PORT is not set
+    app.run(debug=True, host='0.0.0.0', port=port)
