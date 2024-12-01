@@ -68,11 +68,15 @@ def upload_file():
     if file.filename == '':
         return redirect(request.url)
     
+    # Check if the file is a valid PSD file
     if file and file.filename.lower().endswith('.psd'):
+        # Generate a unique filename for the uploaded PSD file
         filename = str(uuid.uuid4()) + '.psd'
         psd_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Save the PSD file to the upload folder
         file.save(psd_path)
-
+        
         # Define the output JPEG and thumbnail file paths
         jpeg_filename = filename.replace('.psd', '.jpeg')
         jpeg_path = os.path.join(app.config['CONVERTED_FOLDER'], jpeg_filename)
@@ -80,13 +84,16 @@ def upload_file():
         thumbnail_filename = filename.replace('.psd', '_thumbnail.jpeg')
         thumbnail_path = os.path.join(app.config['CONVERTED_FOLDER'], thumbnail_filename)
 
-        # Convert PSD to JPEG and Thumbnail
-        convert_psd_to_jpeg(psd_path, jpeg_path)
-        convert_psd_to_thumbnail(psd_path, thumbnail_path)
-
-        return render_template('index.html', jpeg_filename=jpeg_filename, thumbnail_filename=thumbnail_filename)
+        # Convert the PSD to JPEG and Thumbnail
+        try:
+            convert_psd_to_jpeg(psd_path, jpeg_path)
+            convert_psd_to_thumbnail(psd_path, thumbnail_path)
+            return render_template('index.html', jpeg_filename=jpeg_filename, thumbnail_filename=thumbnail_filename)
+        except Exception as e:
+            return f"Error during conversion: {str(e)}", 500
     else:
         return "Please upload a valid PSD file.", 400
+
 
 @app.route('/downloads/<filename>')
 def download_file(filename):
